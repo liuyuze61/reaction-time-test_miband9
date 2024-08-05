@@ -1,0 +1,183 @@
+<template>
+  <div class="bg" @swipe="exit">
+    <div class="page">
+      <image src="/common/info.png" @click="openab()" style="position: absolute; left: 76px; top: 25px"></image>
+      <text class="text" style="background-color: #98bcff;" if="{{de}}">点击“开始”按钮，等待变色，变色后立即点击</text>
+      <div class="text" @click="reaction('e')" style="background-color: #98ffa0;" if="{{af}}"></div>
+      <text class="btn" @click="click()">{{btn}}</text>
+      <text style="position: absolute;top:340px;left:10px;font-size: 30px;color:black">本次{{t1}}ms</text>
+      <text style="position: absolute;top:380px;left:10px;font-size: 30px;color:black">最佳{{bt}}ms</text>
+    </div>
+    <!--关于-->
+    <scroll class="bg" if="{{ab}}">
+      <image src="/common/about.png" @click="exit('e')" />
+      <text class="reset" @click="reset">重置</text>
+    </scroll>
+  </div>
+</template>
+
+<script>
+import prompt from "@system.prompt";
+import storage from '@system.storage'
+
+//随机数
+function getRandomInt(min,max) {
+  return Math.floor(Math.random() * (max-min+1))+min
+}
+
+//t1为本次，bt为最佳，t计时
+export default {
+  private: {
+    ab:false,
+    de:true,
+    af:false,
+    t:0,
+    t1:0,
+    bt:0,
+    btn:"开始",
+  },
+  /*进入页面读取最佳*/
+  onInit(){
+    storage.get({
+      key: 'files',
+      success: (data) => {
+        if(data) {this.bt=data}
+      },
+      fail:()=>{},
+    })
+  },
+  /*右滑退出*/
+  exit(a) {
+    if(a.direction=='right'||a=="e"){
+      if(this.ab)this.ab=false
+      else this.$app.exit()
+    }
+  },
+  /*关于页面显示*/
+  openab(){
+    this.ab=true
+  },
+  /*点击开始*/
+  click(){
+    this.btn="等待"
+    var i = getRandomInt(2000,5000)
+    //console.log("i="+i)
+    var timeout = setTimeout(() => {
+      this.de=false
+      this.af=true
+      this.t=0
+      //console.log("已变色")
+      //console.log("点击前t="+this.t)
+      this.reaction('a')
+      clearTimeout(timeout)
+    }, i);
+  },
+  /*计时*/
+  reaction(a){
+    if(a=="a"){
+      var timer = setInterval(() => {this.t=this.t+2}, 1);
+      setTimeout(() => {clearInterval(timer)}, 1500)
+    }else if(a=="e") {
+      //console.log("点击后t="+this.t)
+      this.t1=this.t
+      this.af=false
+      this.de=true
+      this.btn="开始"
+      this.get()
+      setTimeout(() => {
+        if(this.t1<this.bt) {
+          this.bt=this.t1
+          this.save()
+        } else if(this.bt==0) {
+          this.bt=this.t1
+          this.save()
+        }
+      }, 100)
+    }
+  },
+  get(){
+    storage.get({
+      key: 'files',
+      success: (data) => {
+        if(data) {
+          if(this.bt==0){this.bt=data}
+          else if(this.bt>data){this.bt=data}
+        }
+      },
+      fail:()=>{},
+    })
+  },
+  save(){
+    let data=this.bt
+    storage.set({
+      key: 'files',
+      value: JSON.stringify(data),
+      success: data => {
+        prompt.showToast({
+        	message: "已保存最新记录",
+        	duration: 900
+      	});
+      },
+      fail:()=>{},
+    })
+  },
+  reset(){
+    storage.set({
+      key: 'files',
+      value: '0',
+      success: data => {
+        prompt.showToast({
+        	message: "已重置",
+        	duration: 900
+      	});
+        this.bt=0
+      },
+      fail:()=>{},
+    })
+  }
+}
+</script>
+
+<style>
+.bg{
+  position: absolute;
+  background-color: #ffffff;
+}
+.page{
+  width: 192px;
+  height: 490px;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.btn {
+  position: absolute;
+  top:270px;
+  width: 90px;
+  height: 60px;
+  border-radius: 15px;
+  text-align: center;
+  background-color: #98bcff;
+}
+.reset{
+  position: absolute;
+  top: 400px;
+  left: 56px;
+  width: 80px;
+  height: 50px;
+  border-radius: 10px;
+  text-align: center;
+  color: #ffffff;
+  background-color: #262626;
+}
+.text{
+  position: absolute;
+  text-align: center;
+  width: 160px;
+  height: 160px;
+  left: 16px;
+  top: 90px;
+  font-size: 25px;
+}
+</style>

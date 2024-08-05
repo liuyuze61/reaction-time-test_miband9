@@ -1,0 +1,28 @@
+{
+  "package": "com.liuyuze61.reaction",
+  "name": "反应测试",
+  "versionName": "1.2.1",
+  "versionCode": 1,
+  "minPlatformVersion": 1003,
+  "icon": "/common/logo.png",
+  "deviceTypeList": [
+    "watch"
+  ],
+  "features": [
+    {
+      "name": "system.router"
+    }
+  ],
+  "config": {
+    "logLevel": "log",
+    "designWidth": 192
+  },
+  "router": {
+    "entry": "pages/index",
+    "pages": {
+      "pages/index": {
+        "component": "index"
+      }
+    }
+  }
+}
