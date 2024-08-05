@@ -1,4 +1,4 @@
-#Reaction time text
+# Reaction time text
 Reaction time text for Vela OS
 ## how to build?
 follow <https://iot.mi.com/vela/quickapp>
